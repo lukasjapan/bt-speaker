@@ -1,0 +1,11 @@
+[Unit]
+Description="Simple bluetooth speaker for the Raspberry Pi"
+
+[Service]
+TimeoutStartSec=0
+WorkingDirectory=/opt/bt-speaker
+ExecStart=/opt/bt-speaker/bt_speaker.py
+Restart=always
+
+[Install]
+WantedBy=multi-user.target
