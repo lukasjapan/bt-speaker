@@ -7,6 +7,9 @@ set -e
 apt-get update
 apt-get install git bluez python python-gobject python-cffi python-dbus python-alsaaudio python-configparser sound-theme-freedesktop vorbis-tools
 
+# Add btspeaker user if not exist already
+id -u btspeaker &>/dev/null || useradd btspeaker -G audio
+
 # Download bt-speaker to /opt
 cd /opt
 git clone https://github.com/lukasjapan/bt-speaker.git

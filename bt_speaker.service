@@ -6,6 +6,7 @@ TimeoutStartSec=0
 WorkingDirectory=/opt/bt-speaker
 ExecStart=/opt/bt-speaker/bt_speaker.py
 Restart=always
+User=btspeaker
 
 [Install]
 WantedBy=multi-user.target
