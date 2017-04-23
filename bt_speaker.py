@@ -15,17 +15,33 @@ import signal
 import subprocess
 import alsaaudio
 import math
+import configparser
+import io
 
-BLUEZ_DEVICE_PATH  = '/org/bluez/hci0'
-PLAY_COMMAND       = 'aplay -f cd -'
-ALSA_CONTROL       = 'PCM'
+BTSPEAKER_CONFIG_FILE = '/etc/bt_speaker/config.ini'
+
+# Load config
+default_config = u'''
+[bt_speaker]
+play_command = aplay -f cd -
+
+[bluez]
+device_path = /org/bluez/hci0
+
+[alsa]
+mixer = PCM
+'''
+
+config = configparser.SafeConfigParser()
+config.readfp(io.StringIO(default_config))
+config.read(BTSPEAKER_CONFIG_FILE)
 
 class PipedSBCAudioSinkWithAlsaVolumeControl(SBCAudioSink):
     """
     An audiosink that pipes the decoded output to a command via stdin.
     The class also sets the volume of an alsadevice
     """
-    def __init__(self, path='/endpoint/a2dpsink', command=PLAY_COMMAND, alsa_control=ALSA_CONTROL, buf_size=2560):
+    def __init__(self, path='/endpoint/a2dpsink', command=config.get('bt_speaker', 'play_command'), alsa_control=config.get('alsa', 'mixer'), buf_size=2560):
         SBCAudioSink.__init__(self, path=path)
         # Start process
         self.process = subprocess.Popen(command, shell=True, bufsize=buf_size, stdin=subprocess.PIPE)
@@ -59,7 +75,7 @@ class AutoAcceptSingleAudioAgent(BTAgent):
     """
     def __init__(self):
         BTAgent.__init__(self, cb_notify_on_authorize=self.auto_accept_one)
-        self.adapter = BTAdapter(BLUEZ_DEVICE_PATH)
+        self.adapter = BTAdapter(config.get('bluez', 'device_path'))
         self.allowed_uuids = [ SERVICES["AdvancedAudioDistribution"].uuid, SERVICES["AVRemoteControl"].uuid ]
         self.connected = None
         self.tracked_devices =  []
@@ -112,7 +128,7 @@ def setup_bt():
     
     # register sink and media endpoint
     sink = PipedSBCAudioSinkWithAlsaVolumeControl()
-    media = BTMedia(BLUEZ_DEVICE_PATH)
+    media = BTMedia(config.get('bluez', 'device_path'))
     media.register_endpoint(sink._path, sink.get_properties())
 
 def run():

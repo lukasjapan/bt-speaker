@@ -29,6 +29,30 @@ The speakers name will default to the hostname of your Raspberry Pi.
 BT-Speaker does not manage this value.
 You are advised to change the hostname according to your needs.
 
+## Config
+
+The default settings of BT-Speaker can be overridden in `/etc/bt_speaker/config.ini`.
+
+Section | Key | Default Value | Description
+------------ | ------------- | ------------- | -------------
+bt_speaker | play_command | aplay -f cd - | The raw audio in CD Format (16bit little endian, 44100Hz, stereo) is piped to this command.
+bluez | device_path | /org/bluez/hci0 | The DBUS path where BT-Speaker can find the bluetooth device
+alsa | mixer | PCM | The volume of this mixer will be set from AVRCP messages (Remote volume control)
+
+
+Example of `/etc/bt_speaker/config.ini`:
+
+```ini
+[bt_speaker]
+play_command = aplay -f cd -
+
+[bluez]
+device_path = /org/bluez/hci0
+
+[alsa]
+mixer = PCM
+```
+
 ## Details of Implementation
 
 The BT-Speaker daemon has been written in Python and works with Bluez5.
@@ -74,10 +98,4 @@ However, if you need to do so for some reason, please be aware that the Makefile
 
 1. The default `PLATFORM` setting has been changed to `armv6`
 1. The `-O3` flag has been added
-
-#### Output
-
-The decoded raw audio data can be piped to any command.
-It defaults to `aplay -f cd -` which will send the data straight to the sound card.
-You can change the output command at [bt_speaker.py](bt_speaker.py#L20) if you want to further process the stream.
 

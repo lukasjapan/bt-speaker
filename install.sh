@@ -5,7 +5,7 @@ set -e
 
 # Install dependencies
 apt-get update
-apt-get install git bluez python python-gobject python-cffi python-dbus python-alsaaudio
+apt-get install git bluez python python-gobject python-cffi python-dbus python-alsaaudio python-configparser
 
 # Download bt-speaker to /opt
 cd /opt
