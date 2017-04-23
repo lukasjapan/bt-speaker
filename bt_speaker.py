@@ -24,6 +24,8 @@ BTSPEAKER_CONFIG_FILE = '/etc/bt_speaker/config.ini'
 default_config = u'''
 [bt_speaker]
 play_command = aplay -f cd -
+connect_command = ogg123 /usr/share/sounds/freedesktop/stereo/service-login.oga
+disconnect_command = ogg123 /usr/share/sounds/freedesktop/stereo/service-logout.oga
 
 [bluez]
 device_path = /org/bluez/hci0
@@ -110,14 +112,16 @@ class AutoAcceptSingleAudioAgent(BTAgent):
         if self.connected and self.connected != device: return
         if not 'Connected' in properties: return
         
-        if bool(properties['Connected']):
+        if not self.connected and bool(properties['Connected']):
             print("Device connected. device=%s" % device)
+            subprocess.Popen(config.get('bt_speaker', 'connect_command'), shell=True)
             self.connected = device
-        else:
+            self.update_discoverable()
+        elif self.connected and not bool(properties['Connected']):
             print("Device disconnected. device=%s" % device)
+            subprocess.Popen(config.get('bt_speaker', 'disconnect_command'), shell=True)
             self.connected = None
-            
-        self.update_discoverable()
+            self.update_discoverable()
 
 def setup_bt():
     # setup bluetooth agent (that manages connections of devices)

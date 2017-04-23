@@ -36,6 +36,8 @@ The default settings of BT-Speaker can be overridden in `/etc/bt_speaker/config.
 Section | Key | Default Value | Description
 ------------ | ------------- | ------------- | -------------
 bt_speaker | play_command | aplay -f cd - | The raw audio in CD Format (16bit little endian, 44100Hz, stereo) is piped to this command.
+bt_speaker | connect_command | ogg123 /usr/share/sounds/freedesktop/stereo/service-login.oga | Command that is called when an audio device connects to BT-Speaker
+bt_speaker | disconnect_command | ogg123 /usr/share/sounds/freedesktop/stereo/service-logout.oga | Command that is called when an audio device disconnects from BT-Speaker
 bluez | device_path | /org/bluez/hci0 | The DBUS path where BT-Speaker can find the bluetooth device
 alsa | mixer | PCM | The volume of this mixer will be set from AVRCP messages (Remote volume control)
 
@@ -45,6 +47,8 @@ Example of `/etc/bt_speaker/config.ini`:
 ```ini
 [bt_speaker]
 play_command = aplay -f cd -
+connect_command = ogg123 /usr/share/sounds/freedesktop/stereo/service-login.oga
+disconnect_command = ogg123 /usr/share/sounds/freedesktop/stereo/service-logout.oga
 
 [bluez]
 device_path = /org/bluez/hci0
