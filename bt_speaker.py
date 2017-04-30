@@ -114,14 +114,14 @@ class AutoAcceptSingleAudioAgent(BTAgent):
         
         if not self.connected and bool(properties['Connected']):
             print("Device connected. device=%s" % device)
-            subprocess.Popen(config.get('bt_speaker', 'connect_command'), shell=True)
             self.connected = device
             self.update_discoverable()
+            subprocess.Popen(config.get('bt_speaker', 'connect_command'), shell=True)
         elif self.connected and not bool(properties['Connected']):
             print("Device disconnected. device=%s" % device)
-            subprocess.Popen(config.get('bt_speaker', 'disconnect_command'), shell=True)
             self.connected = None
             self.update_discoverable()
+            subprocess.Popen(config.get('bt_speaker', 'disconnect_command'), shell=True)
 
 def setup_bt():
     # setup bluetooth agent (that manages connections of devices)
