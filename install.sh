@@ -1,19 +1,43 @@
 #!/bin/bash
 set -e
 
-# This script has been tested with the "2017-01-11-raspbian-jessie-lite.img" image.
+# This script has been tested with the "2017-04-10-raspbian-jessie-lite.img" image.
 
-# Install dependencies
+echo "Installing dependencies..."
 apt-get update
 apt-get install git bluez python python-gobject python-cffi python-dbus python-alsaaudio python-configparser sound-theme-freedesktop vorbis-tools
+echo "done."
 
 # Add btspeaker user if not exist already
+echo
+echo "Adding btspeaker user..."
 id -u btspeaker &>/dev/null || useradd btspeaker -G audio
+echo "done."
 
-# Download bt-speaker to /opt
+# Download bt-speaker to /opt (or update if already present)
+echo
 cd /opt
-git clone https://github.com/lukasjapan/bt-speaker.git
+if [ -d bt-speaker ]; then
+  echo "Updating bt-speaker..."
+  cd bt-speaker && git pull
+else
+  echo "Downloading bt-speaker..."
+  git clone https://github.com/lukasjapan/bt-speaker.git
+fi
+echo "done."
 
 # Install and start bt-speaker daemon
+echo
+echo "Registering and starting bt-speaker with systemd..."
 systemctl enable /opt/bt-speaker/bt_speaker.service
-systemctl start bt_speaker
+if [ "`systemctl is-active bt_speaker`" != "active" ]; then
+  systemctl start bt_speaker
+else
+  systemctl restart bt_speaker
+fi
+systemctl status bt_speaker
+echo "done."
+
+# Finished
+echo
+echo "BT-Speaker has been installed."
