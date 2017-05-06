@@ -32,6 +32,7 @@ device_path = /org/bluez/hci0
 
 [alsa]
 mixer = PCM
+cardindex = 0
 '''
 
 config = configparser.SafeConfigParser()
@@ -48,7 +49,7 @@ class PipedSBCAudioSinkWithAlsaVolumeControl(SBCAudioSink):
         # Start process
         self.process = subprocess.Popen(command, shell=True, bufsize=buf_size, stdin=subprocess.PIPE)
         # Hook into alsa service for volume control
-        self.alsamixer = alsaaudio.Mixer(control=alsa_control)
+        self.alsamixer = alsaaudio.Mixer(control=alsa_control, cardindex=int(config.get('alsa', 'cardindex')))
     
     def raw_audio(self, data):
         # pipe to the play command

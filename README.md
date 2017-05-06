@@ -40,6 +40,7 @@ bt_speaker | connect_command | ogg123 /usr/share/sounds/freedesktop/stereo/servi
 bt_speaker | disconnect_command | ogg123 /usr/share/sounds/freedesktop/stereo/service-logout.oga | Command that is called when an audio device disconnects from BT-Speaker
 bluez | device_path | /org/bluez/hci0 | The DBUS path where BT-Speaker can find the bluetooth device
 alsa | mixer | PCM | The volume of this mixer will be set from AVRCP messages (Remote volume control)
+alsa | cardindex | 0 | The alsa cardindex for the soundcard
 
 
 Example of `/etc/bt_speaker/config.ini`:
