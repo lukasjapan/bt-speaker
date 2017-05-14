@@ -32,6 +32,7 @@ device_path = /org/bluez/hci0
 
 [alsa]
 mixer = PCM
+id = 0
 cardindex = 0
 '''
 
@@ -44,12 +45,19 @@ class PipedSBCAudioSinkWithAlsaVolumeControl(SBCAudioSink):
     An audiosink that pipes the decoded output to a command via stdin.
     The class also sets the volume of an alsadevice
     """
-    def __init__(self, path='/endpoint/a2dpsink', command=config.get('bt_speaker', 'play_command'), alsa_control=config.get('alsa', 'mixer'), buf_size=2560):
+    def __init__(self, path='/endpoint/a2dpsink',
+                       command=config.get('bt_speaker', 'play_command'),
+                       alsa_control=config.get('alsa', 'mixer'),
+                       alsa_id=int(config.get('alsa', 'id')),
+                       alsa_cardindex=int(config.get('alsa', 'cardindex')),
+                       buf_size=2560):
         SBCAudioSink.__init__(self, path=path)
         # Start process
         self.process = subprocess.Popen(command, shell=True, bufsize=buf_size, stdin=subprocess.PIPE)
         # Hook into alsa service for volume control
-        self.alsamixer = alsaaudio.Mixer(control=alsa_control, cardindex=int(config.get('alsa', 'cardindex')))
+        self.alsamixer = alsaaudio.Mixer(control=alsa_control,
+                                         id=alsa_id,
+                                         cardindex=alsa_cardindex)
     
     def raw_audio(self, data):
         # pipe to the play command
