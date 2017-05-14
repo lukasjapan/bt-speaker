@@ -58,6 +58,8 @@ disconnect_command = ogg123 /usr/share/sounds/freedesktop/stereo/service-logout.
 device_path = /org/bluez/hci0
 
 [alsa]
+id = 0
+cardindex = 1
 mixer = PCM
 ```
 
