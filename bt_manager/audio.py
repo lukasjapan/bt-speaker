@@ -304,8 +304,9 @@ class SBCAudioCodec(GenericEndpoint):
         """
         try:
             self._uninstall_transport_ready()
-            print("Released MediaTransport. fd=%s", self.fd)
+            print("Released MediaTransport. fd=%s" % (self.fd))
             os.close(self.fd)   # Clean-up previously taken fd
+            self.fd = None
             transport = BTMediaTransport(path=path)
             transport.release(access_type)
         except:
@@ -504,13 +505,13 @@ class SBCAudioSink(SBCAudioCodec):
         acquisition/release
         """
         new_properties = args[1]
-        
+
         for k in new_properties.keys():
             if k == 'State':
                 self._state_changed(new_properties[k], transport)
             elif k == 'Volume':
                 self.volume(new_properties[k])
-        
+
     def _state_changed(self, new_state, transport):
         if (self.state == 'idle' and new_state == 'pending'):
             self._acquire_media_transport(transport, 'r')
@@ -518,9 +519,9 @@ class SBCAudioSink(SBCAudioCodec):
         elif (self.state == 'active' and new_state == 'idle'):
             self._release_media_transport(transport, 'r')
             self.stop()
-            
+
         print("State changed from %s to %s." % (self.state, new_state))
-        
+
         self.state = new_state
 
     def _notify_media_transport_available(self, path, transport):
@@ -534,19 +535,19 @@ class SBCAudioSink(SBCAudioCodec):
         self.source.add_signal_receiver(self._property_change_event_handler,
                                         BTAudioSource.SIGNAL_PROPERTY_CHANGED,  # noqa
                                         transport)
-    
+
     def _process_decoded(self, args):
         self.raw_audio(self.read_transport())
-    
+
     def raw_audio(self, data):
         pass
-        
+
     def start(self):
         pass
-    
+
     def stop(self):
         pass
-    
+
     def volume(self, new_volume):
         pass
 
