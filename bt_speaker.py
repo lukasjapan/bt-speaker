@@ -142,11 +142,9 @@ def setup_bt():
     media.register_endpoint(sink._path, sink.get_properties())
 
     def connect():
-        print("connect callback")
         subprocess.Popen(config.get('bt_speaker', 'connect_command'), shell=True)
 
     def disconnect():
-        print("disconnect callback")
         sink.close_transport()
         subprocess.Popen(config.get('bt_speaker', 'disconnect_command'), shell=True)
 
