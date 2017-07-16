@@ -58,25 +58,25 @@ class PipedSBCAudioSinkWithAlsaVolumeControl(SBCAudioSink):
         self.alsamixer = alsaaudio.Mixer(control=alsa_control,
                                          id=alsa_id,
                                          cardindex=alsa_cardindex)
-    
+
     def raw_audio(self, data):
         # pipe to the play command
         self.process.stdin.write(data)
-        
+
     def volume(self, new_volume):
         # normalize volume
         volume = float(new_volume) / 127.0
-        
+
         print("Volume changed to %i%%" % (volume * 100.0))
-        
+
         # it looks like the value passed to alsamixer sets the volume by 'power level'
         # to adjust to the (human) perceived volume, we have to square the volume
         # @todo check if this only applies to the raspberry pi or in general (or if i got it wrong)
         volume = math.pow(volume, 1.0/3.0)
-        
+
         # alsamixer takes a percent value as integer from 0-100
         self.alsamixer.setvolume(int(volume * 100.0))
-        
+
 class AutoAcceptSingleAudioAgent(BTAgent):
     """
     Accepts one client unconditionally and hides the device once connected.
@@ -84,14 +84,16 @@ class AutoAcceptSingleAudioAgent(BTAgent):
     This 'first comes first served' is not necessarily the 'bluetooth way' of
     connecting devices but the easiest to implement.
     """
-    def __init__(self):
+    def __init__(self, connect_callback, disconnect_callback):
         BTAgent.__init__(self, cb_notify_on_authorize=self.auto_accept_one)
         self.adapter = BTAdapter(config.get('bluez', 'device_path'))
         self.allowed_uuids = [ SERVICES["AdvancedAudioDistribution"].uuid, SERVICES["AVRemoteControl"].uuid ]
         self.connected = None
         self.tracked_devices =  []
+        self.connect_callback = connect_callback
+        self.disconnect_callback = disconnect_callback
         self.update_discoverable()
-        
+
     def update_discoverable(self):
         if bool(self.connected):
             print("Hiding adapter from all devices.")
@@ -99,13 +101,13 @@ class AutoAcceptSingleAudioAgent(BTAgent):
         else:
             print("Showing adapter to all devices.")
             self.adapter.set_property('Discoverable', True)
-        
+
     def auto_accept_one(self, method, device, uuid):
         if not BTUUID(uuid).uuid in self.allowed_uuids: return False
         if self.connected and self.connected != device:
             print("Rejecting device, because another one is already connected. connected_device=%s, device=%s" % (self.connected, device))
             return False
-        
+
         # track connection state of the device (is there a better way?)
         if not device in self.tracked_devices:
             self.tracked_devices.append(device)
@@ -114,35 +116,45 @@ class AutoAcceptSingleAudioAgent(BTAgent):
                                                   signal_name='PropertiesChanged',
                                                   dbus_interface='org.freedesktop.DBus.Properties',
                                                   path_keyword='device')
-        
+
         return True
-    
+
     def _track_connection_state(self, addr, properties, signature, device):
         if self.connected and self.connected != device: return
         if not 'Connected' in properties: return
-        
+
         if not self.connected and bool(properties['Connected']):
             print("Device connected. device=%s" % device)
             self.connected = device
             self.update_discoverable()
-            subprocess.Popen(config.get('bt_speaker', 'connect_command'), shell=True)
+            self.connect_callback()
+
         elif self.connected and not bool(properties['Connected']):
             print("Device disconnected. device=%s" % device)
             self.connected = None
             self.update_discoverable()
-            subprocess.Popen(config.get('bt_speaker', 'disconnect_command'), shell=True)
+            self.disconnect_callback()
 
 def setup_bt():
-    # setup bluetooth agent (that manages connections of devices)
-    agent = AutoAcceptSingleAudioAgent()
-    manager = BTAgentManager()
-    manager.register_agent(agent._path, "NoInputNoOutput")
-    manager.request_default_agent(agent._path)
-    
     # register sink and media endpoint
     sink = PipedSBCAudioSinkWithAlsaVolumeControl()
     media = BTMedia(config.get('bluez', 'device_path'))
     media.register_endpoint(sink._path, sink.get_properties())
+
+    def connect():
+        print("connect callback")
+        subprocess.Popen(config.get('bt_speaker', 'connect_command'), shell=True)
+
+    def disconnect():
+        print("disconnect callback")
+        sink.close_transport()
+        subprocess.Popen(config.get('bt_speaker', 'disconnect_command'), shell=True)
+
+    # setup bluetooth agent (that manages connections of devices)
+    agent = AutoAcceptSingleAudioAgent(connect, disconnect)
+    manager = BTAgentManager()
+    manager.register_agent(agent._path, "NoInputNoOutput")
+    manager.request_default_agent(agent._path)
 
 def run():
     # Initialize the DBus SystemBus
@@ -150,13 +162,13 @@ def run():
 
     # Mainloop for communication
     mainloop = GLib.MainLoop()
-   
+
     # catch SIGTERM
     GLib.unix_signal_add(GLib.PRIORITY_HIGH, signal.SIGTERM, lambda signal: mainloop.quit(), None)
-    
+
     # setup bluetooth configuration
     setup_bt()
-    
+
     # Run
     mainloop.run()
 
