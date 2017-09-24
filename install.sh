@@ -1,7 +1,7 @@
 #!/bin/bash
 set -e
 
-# This script has been tested with the "2017-04-10-raspbian-jessie-lite.img" image.
+# This script has been tested with the "2017-09-07-raspbian-stretch-lite.img" image.
 
 echo "Installing dependencies..."
 apt-get update
@@ -12,6 +12,8 @@ echo "done."
 echo
 echo "Adding btspeaker user..."
 id -u btspeaker &>/dev/null || useradd btspeaker -G audio
+# Also add user to bluetooth group if it exists (required in debian stretch)
+getent group bluetooth &>/dev/null && usermod -a -G bluetooth btspeaker
 echo "done."
 
 # Download bt-speaker to /opt (or update if already present)
