@@ -8,14 +8,6 @@ apt-get update
 apt-get install git bluez python python-gobject python-cffi python-dbus python-alsaaudio python-configparser sound-theme-freedesktop vorbis-tools
 echo "done."
 
-# Add btspeaker user if not exist already
-echo
-echo "Adding btspeaker user..."
-id -u btspeaker &>/dev/null || useradd btspeaker -G audio
-# Also add user to bluetooth group if it exists (required in debian stretch)
-getent group bluetooth &>/dev/null && usermod -a -G bluetooth btspeaker
-echo "done."
-
 # Download bt-speaker to /opt (or update if already present)
 echo
 cd /opt
@@ -24,9 +16,22 @@ if [ -d bt-speaker ]; then
   cd bt-speaker && git pull
 else
   echo "Downloading bt-speaker..."
-  git clone https://github.com/lukasjapan/bt-speaker.git
+  git clone https://github.com/c-larsen/bt-speaker.git
 fi
 echo "done."
+
+if [ $1 != "root" ]; then
+  # Add btspeaker user if not exist already
+  echo
+  echo "Adding btspeaker user..."
+  id -u btspeaker &>/dev/null || useradd btspeaker -G audio
+  # Also add user to bluetooth group if it exists (required in debian stretch)
+  getent group bluetooth &>/dev/null && usermod -a -G bluetooth btspeaker
+  echo "done."
+else
+  #Change the service script to run as root instead
+  sed -i -e 's/btspeaker/root/g' /opt/bt-speaker/bt_speaker.service
+fi
 
 # Install and start bt-speaker daemon
 echo

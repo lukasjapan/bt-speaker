@@ -26,6 +26,9 @@ default_config = u'''
 play_command = aplay -f cd -
 connect_command = ogg123 /usr/share/sounds/freedesktop/stereo/service-login.oga
 disconnect_command = ogg123 /usr/share/sounds/freedesktop/stereo/service-logout.oga
+disable_wifi_on_connect = yes
+wifi_down_command = ifconfig wlan0 down
+wifi_up_command = ifconfig wlan0 up
 
 [bluez]
 device_path = /org/bluez/hci0
@@ -98,9 +101,13 @@ class AutoAcceptSingleAudioAgent(BTAgent):
         if bool(self.connected):
             print("Hiding adapter from all devices.")
             self.adapter.set_property('Discoverable', False)
+            if config.getboolean('bt_speaker', 'disable_wifi_on_connect'):
+                subprocess.Popen(config.get('bt_speaker', 'wifi_down_command'), shell=True)
         else:
             print("Showing adapter to all devices.")
             self.adapter.set_property('Discoverable', True)
+            if config.getboolean('bt_speaker', 'disable_wifi_on_connect'):
+                subprocess.Popen(config.get('bt_speaker', 'wifi_up_command'), shell=True)
 
     def auto_accept_one(self, method, device, uuid):
         if not BTUUID(uuid).uuid in self.allowed_uuids: return False
