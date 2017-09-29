@@ -26,7 +26,7 @@ default_config = u'''
 play_command = aplay -f cd -
 connect_command = ogg123 /usr/share/sounds/freedesktop/stereo/service-login.oga
 disconnect_command = ogg123 /usr/share/sounds/freedesktop/stereo/service-logout.oga
-disable_wifi_on_connect = yes
+disable_wifi_on_connect = no
 wifi_down_command = ifconfig wlan0 down
 wifi_up_command = ifconfig wlan0 up
 
