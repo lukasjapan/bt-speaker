@@ -18,6 +18,9 @@ This can be done by `raspi-config`:
 
 `Advanced Options` -> `Audio` -> `Force 3.5mm ('headphone') jack`
 
+_Note_: Bt-speaker has been made with the default raspian audio configuration in mind.
+If you are using external sound cards or have installed a sound daemon (like PulseAudio or Jack) you might need to adjust the bt-speaker config file accordingly.
+
 ## Usage
 
 The BT-Speaker daemon does not behave like a typical bluetooth device.
