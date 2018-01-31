@@ -53,15 +53,35 @@ class PipedSBCAudioSinkWithAlsaVolumeControl(SBCAudioSink):
                        buf_size=2560):
         SBCAudioSink.__init__(self, path=path)
         # Start process
-        self.process = subprocess.Popen(command, shell=True, bufsize=buf_size, stdin=subprocess.PIPE)
+        self.start_aplay(command,buf_size)
         # Hook into alsa service for volume control
         self.alsamixer = alsaaudio.Mixer(control=alsa_control,
                                          id=alsa_id,
                                          cardindex=alsa_cardindex)
 
-    def raw_audio(self, data):
+    def start_aplay(self, command, buf_size):
+        # Start the aplay process
+        self.process = subprocess.Popen(command, shell=True, bufsize=buf_size, stdin=subprocess.PIPE)
+        # Store the command and the buf size in case we need to restart aplay at some time
+        self.aplay_command = command
+        self.aplay_buf_size = buf_size
+
+    def restart_aplay(self):
+        # Restart the aplay-process with the same parameters as when it was started
+        self.start_aplay(self.aplay_command,self.aplay_buf_size)
+
+    def raw_audio(self, data, retry=False):
         # pipe to the play command
-        self.process.stdin.write(data)
+        try:
+            self.process.stdin.write(data)
+        except IOError as err:
+            # This is already a retry. Restarting aplay did not work. Nothing we can do here...
+            if retry:
+                raise err
+
+            # Probably the aplay-process crashed. Restart it and try again.
+            self.restart_aplay()
+            self.raw_audio(data,retry=True)
 
     def volume(self, new_volume):
         # normalize volume
