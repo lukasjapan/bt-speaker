@@ -24,7 +24,7 @@ if [ -d bt-speaker ]; then
   cd bt-speaker && git pull
 else
   echo "Downloading bt-speaker..."
-  git clone https://github.com/lukasjapan/bt-speaker.git
+  git clone https://github.com/djh816/bt-speaker.git
 fi
 echo "done."
 
