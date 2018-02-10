@@ -158,11 +158,11 @@ def setup_bt():
     media.register_endpoint(sink._path, sink.get_properties())
 
     def connect():
-        subprocess.Popen(config.get('bt_speaker', 'connect_command'), shell=True)
+        subprocess.Popen(config.get('bt_speaker', 'connect_command'), shell=True).communicate()
 
     def disconnect():
         sink.close_transport()
-        subprocess.Popen(config.get('bt_speaker', 'disconnect_command'), shell=True)
+        subprocess.Popen(config.get('bt_speaker', 'disconnect_command'), shell=True).communicate()
 
     # setup bluetooth agent (that manages connections of devices)
     agent = AutoAcceptSingleAudioAgent(connect, disconnect)
