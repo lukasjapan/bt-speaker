@@ -37,7 +37,7 @@ if [ "`systemctl is-active bt_speaker`" != "active" ]; then
 else
   systemctl restart bt_speaker
 fi
-systemctl status bt_speaker
+systemctl status bt_speaker --full --no-pager
 echo "done."
 
 # Finished
