@@ -5,7 +5,7 @@ set -e
 
 echo "Installing dependencies..."
 apt-get update
-apt-get install git bluez python python-gobject python-cffi python-dbus python-alsaaudio python-configparser sound-theme-freedesktop vorbis-tools
+apt-get --yes --force-yes install git bluez python python-gobject python-cffi python-dbus python-alsaaudio python-configparser sound-theme-freedesktop vorbis-tools
 echo "done."
 
 # Add btspeaker user if not exist already
@@ -24,7 +24,7 @@ if [ -d bt-speaker ]; then
   cd bt-speaker && git pull
 else
   echo "Downloading bt-speaker..."
-  git clone https://github.com/lukasjapan/bt-speaker.git
+  git clone https://github.com/djh816/bt-speaker.git
 fi
 echo "done."
 
@@ -37,7 +37,7 @@ if [ "`systemctl is-active bt_speaker`" != "active" ]; then
 else
   systemctl restart bt_speaker
 fi
-systemctl status bt_speaker
+systemctl status bt_speaker --full --no-pager
 echo "done."
 
 # Finished

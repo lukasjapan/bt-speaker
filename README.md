@@ -1,5 +1,6 @@
 # BT-Speaker
 
+(Forked from Lukasjapan's original)
 A simple Bluetooth Speaker Daemon designed for the Raspberry Pi 3.
 
 ## Installation
@@ -8,10 +9,10 @@ Quick Installation for Raspbian:
 
 ```bash
 sudo -i
-bash <(curl -s https://raw.githubusercontent.com/lukasjapan/bt-speaker/master/install.sh)
+bash <(curl -s https://raw.githubusercontent.com/djh816/bt-speaker/master/install.sh)
 ```
 
-For details refer to the comments in the [install script](https://github.com/lukasjapan/bt-speaker/blob/master/install.sh).
+For details refer to the comments in the [install script](https://github.com/djh816/bt-speaker/blob/master/install.sh).
 
 Depending on your application, you might also want to send all audio to the headphone jack.
 This can be done by `raspi-config`:

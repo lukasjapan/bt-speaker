@@ -58,10 +58,26 @@ class PipedSBCAudioSinkWithAlsaVolumeControl(SBCAudioSink):
         self.alsamixer = alsaaudio.Mixer(control=alsa_control,
                                          id=alsa_id,
                                          cardindex=alsa_cardindex)
+        
+        self.initial_values = {'command': command,
+                               'buf_size': buf_size,
+                               'alsa_control': alsa_control,
+                               'alsa_id': alsa_id,
+                               'alsa_cardindex': alsa_cardindex}
 
     def raw_audio(self, data):
         # pipe to the play command
-        self.process.stdin.write(data)
+        try:
+            self.process.stdin.write(data)
+        except:
+            self.process = subprocess.Popen(self.initial_values['command'],
+                                            shell=True,
+                                            bufsize=self.initial_values['buf_size'],
+                                            stdin=subprocess.PIPE)
+            self.alsamixer = alsaaudio.Mixer(control=self.initial_values['alsa_control'],
+                                             id=self.initial_values['alsa_id'],
+                                             cardindex=self.initial_values['alsa_cardindex'])
+            self.process.stdin.write(data)
 
     def volume(self, new_volume):
         # normalize volume
@@ -142,11 +158,11 @@ def setup_bt():
     media.register_endpoint(sink._path, sink.get_properties())
 
     def connect():
-        subprocess.Popen(config.get('bt_speaker', 'connect_command'), shell=True)
+        subprocess.Popen(config.get('bt_speaker', 'connect_command'), shell=True).communicate()
 
     def disconnect():
         sink.close_transport()
-        subprocess.Popen(config.get('bt_speaker', 'disconnect_command'), shell=True)
+        subprocess.Popen(config.get('bt_speaker', 'disconnect_command'), shell=True).communicate()
 
     # setup bluetooth agent (that manages connections of devices)
     agent = AutoAcceptSingleAudioAgent(connect, disconnect)
