@@ -56,6 +56,7 @@ class PipedSBCAudioSinkWithAlsaVolumeControl(SBCAudioSink):
         try:
             self.process.stdin.write(data)
         except:
+            # try to restart process on failure
             self.startup()
             self.process.stdin.write(data)
 
