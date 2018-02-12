@@ -1,11 +1,11 @@
-#!/bin/bash
+#!/bin/bash +x
 set -e
 
-# This script has been tested with the "2017-09-07-raspbian-stretch-lite.img" image.
+# This script has been tested with the "2017-11-29-raspbian-stretch-lite.img" image.
 
 echo "Installing dependencies..."
 apt-get update
-apt-get install git bluez python python-gobject python-cffi python-dbus python-alsaaudio python-configparser sound-theme-freedesktop vorbis-tools
+apt-get --yes --force-yes install git bluez python python-gobject python-cffi python-dbus python-alsaaudio python-configparser sound-theme-freedesktop vorbis-tools
 echo "done."
 
 # Add btspeaker user if not exist already
@@ -21,12 +21,19 @@ echo
 cd /opt
 if [ -d bt-speaker ]; then
   echo "Updating bt-speaker..."
-  cd bt-speaker && git pull
+  cd bt-speaker && git pull && git checkout ${1:master}
 else
   echo "Downloading bt-speaker..."
   git clone https://github.com/lukasjapan/bt-speaker.git
+  cd bt-speaker && git checkout ${1:master}
 fi
 echo "done."
+
+# Prepare default config
+mkdir -p /etc/bt_speaker/hooks
+cp -n /opt/bt-speaker/config.ini.default /etc/bt_speaker/config.ini
+cp -n /opt/bt-speaker/hooks.default/connect /etc/bt_speaker/hooks/connect
+cp -n /opt/bt-speaker/hooks.default/disconnect /etc/bt_speaker/hooks/disconnect
 
 # Install and start bt-speaker daemon
 echo
@@ -37,7 +44,7 @@ if [ "`systemctl is-active bt_speaker`" != "active" ]; then
 else
   systemctl restart bt_speaker
 fi
-systemctl status bt_speaker
+  systemctl status bt_speaker --full --no-pager
 echo "done."
 
 # Finished
