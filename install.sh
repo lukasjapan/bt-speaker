@@ -1,7 +1,7 @@
-#!/bin/bash
+#!/bin/bash +x
 set -e
 
-# This script has been tested with the "2017-09-07-raspbian-stretch-lite.img" image.
+# This script has been tested with the "2017-11-29-raspbian-stretch-lite.img" image.
 
 echo "Installing dependencies..."
 apt-get update
@@ -21,12 +21,19 @@ echo
 cd /opt
 if [ -d bt-speaker ]; then
   echo "Updating bt-speaker..."
-  cd bt-speaker && git pull
+  cd bt-speaker && git pull && git checkout ${1:master}
 else
   echo "Downloading bt-speaker..."
   git clone https://github.com/lukasjapan/bt-speaker.git
+  cd bt-speaker && git checkout ${1:master}
 fi
 echo "done."
+
+# Prepare default config
+mkdir -p /etc/bt_speaker/hooks
+cp -n /opt/bt-speaker/config.ini.default /etc/bt_speaker/config.ini
+cp -n /opt/bt-speaker/hooks.default/connect /etc/bt_speaker/hooks/connect
+cp -n /opt/bt-speaker/hooks.default/disconnect /etc/bt_speaker/hooks/disconnect
 
 # Install and start bt-speaker daemon
 echo
@@ -37,7 +44,7 @@ if [ "`systemctl is-active bt_speaker`" != "active" ]; then
 else
   systemctl restart bt_speaker
 fi
-systemctl status bt_speaker --full --no-pager
+  systemctl status bt_speaker --full --no-pager
 echo "done."
 
 # Finished

@@ -34,37 +34,22 @@ You are advised to change the hostname according to your needs.
 
 ## Config
 
-The default settings of BT-Speaker can be overridden in `/etc/bt_speaker/config.ini`.
+The default settings of BT-Speaker will be copied and can be overridden in `/etc/bt_speaker/config.ini`.
 
 Section | Key | Default Value | Description
 ------------ | ------------- | ------------- | -------------
 bt_speaker | play_command | aplay -f cd - | The raw audio in CD Format (16bit little endian, 44100Hz, stereo) is piped to this command.
-bt_speaker | connect_command | ogg123 /usr/share/sounds/freedesktop/stereo/service-login.oga | Command that is called when an audio device connects to BT-Speaker
-bt_speaker | disconnect_command | ogg123 /usr/share/sounds/freedesktop/stereo/service-logout.oga | Command that is called when an audio device disconnects from BT-Speaker
+bt_speaker | connect_command | /etc/bt_speaker/hooks/connect | Command that is called when an audio device connects to BT-Speaker
+bt_speaker | disconnect_command | /etc/bt_speaker/hooks/disconnect | Command that is called when an audio device disconnects from BT-Speaker
 bluez | device_path | /org/bluez/hci0 | The DBUS path where BT-Speaker can find the bluetooth device
+bluez | discoverable | yes | Specifies if the raspberry pi should advertise itself if no client is connected.
+alsa | enabled | yes | Enables volume control via alsamixer
 alsa | mixer | PCM | The volume of this mixer will be set from AVRCP messages (Remote volume control)
 alsa | id | 0 | The alsa id of the mixer control
 alsa | cardindex | 0 | The alsa cardindex of the soundcard
 
 The settings in the alsa section specify on which alsa mixer ([more info here](https://larsimmisch.github.io/pyalsaaudio/libalsaaudio.html#mixer-objects)) volume changes are applied.
 You need to adjust these settings if you are using an external sound card.
-
-Example of `/etc/bt_speaker/config.ini`:
-
-```ini
-[bt_speaker]
-play_command = aplay -f cd -
-connect_command = ogg123 /usr/share/sounds/freedesktop/stereo/service-login.oga
-disconnect_command = ogg123 /usr/share/sounds/freedesktop/stereo/service-logout.oga
-
-[bluez]
-device_path = /org/bluez/hci0
-
-[alsa]
-id = 0
-cardindex = 0
-mixer = PCM
-```
 
 ## Details of Implementation
 
@@ -76,6 +61,16 @@ It talks to the Bluez daemon via the [Bluez DBUS interface](https://git.kernel.o
 BT-Speaker will register itself as an [A2DP](https://en.wikipedia.org/wiki/List_of_Bluetooth_profiles#Advanced_Audio_Distribution_Profile_.28A2DP.29) capable device and route the received audio fully decoded to ALSAs `aplay` command.
 
 Changes in volume are detected via messages from the [AVRCP](https://en.wikipedia.org/wiki/List_of_Bluetooth_profiles#Audio.2FVideo_Remote_Control_Profile_.28AVRCP.29) profile and are applied directly to the ALSA master volume.
+
+### Bluetooth device class
+
+Some devices may filter out BT-Speaker and require the bluetooth device class to be expicitly set. Although BT-Manager does not support to change the device class itself, you can change it manually after launching BT-Speaker.
+
+```ini
+pi@raspberrypi:~ $ sudo hciconfig hci0 class 0x240408
+```
+
+More about Bluetooth device classes can be found ([here](http://bluetooth-pentest.narod.ru/software/bluetooth_class_of_device-service_generator.html))
 
 ### Partial Bluez5 port of BT-Manager
 

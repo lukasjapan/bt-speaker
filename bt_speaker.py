@@ -17,69 +17,52 @@ import alsaaudio
 import math
 import configparser
 import io
+import os
 
-BTSPEAKER_CONFIG_FILE = '/etc/bt_speaker/config.ini'
-
-# Load config
-default_config = u'''
-[bt_speaker]
-play_command = aplay -f cd -
-connect_command = ogg123 /usr/share/sounds/freedesktop/stereo/service-login.oga
-disconnect_command = ogg123 /usr/share/sounds/freedesktop/stereo/service-logout.oga
-
-[bluez]
-device_path = /org/bluez/hci0
-
-[alsa]
-mixer = PCM
-id = 0
-cardindex = 0
-'''
+SCRIPT_PATH = os.path.dirname(os.path.realpath(__file__))
 
 config = configparser.SafeConfigParser()
-config.readfp(io.StringIO(default_config))
-config.read(BTSPEAKER_CONFIG_FILE)
+config.read(SCRIPT_PATH + '/config.ini.default')
+config.read('/etc/bt_speaker/config.ini')
 
 class PipedSBCAudioSinkWithAlsaVolumeControl(SBCAudioSink):
     """
     An audiosink that pipes the decoded output to a command via stdin.
     The class also sets the volume of an alsadevice
     """
-    def __init__(self, path='/endpoint/a2dpsink',
-                       command=config.get('bt_speaker', 'play_command'),
-                       alsa_control=config.get('alsa', 'mixer'),
-                       alsa_id=int(config.get('alsa', 'id')),
-                       alsa_cardindex=int(config.get('alsa', 'cardindex')),
-                       buf_size=2560):
-        SBCAudioSink.__init__(self, path=path)
+    def __init__(self):
+        SBCAudioSink.__init__(self, path='/endpoint/a2dpsink')
+        self.startup()
+
+    def startup(self):
         # Start process
-        self.process = subprocess.Popen(command, shell=True, bufsize=buf_size, stdin=subprocess.PIPE)
-        # Hook into alsa service for volume control
-        self.alsamixer = alsaaudio.Mixer(control=alsa_control,
-                                         id=alsa_id,
-                                         cardindex=alsa_cardindex)
-        
-        self.initial_values = {'command': command,
-                               'buf_size': buf_size,
-                               'alsa_control': alsa_control,
-                               'alsa_id': alsa_id,
-                               'alsa_cardindex': alsa_cardindex}
+        self.process = subprocess.Popen(
+            config.get('bt_speaker', 'play_command'),
+            shell=True,
+            bufsize=2560,
+            stdin=subprocess.PIPE
+        )
+
+        if config.getboolean('alsa', 'enabled'):
+            # Hook into alsa service for volume control
+            self.alsamixer = alsaaudio.Mixer(
+                control=config.get('alsa', 'mixer'),
+                id=int(config.get('alsa', 'id')),
+                cardindex=int(config.get('alsa', 'cardindex'))
+            )
 
     def raw_audio(self, data):
         # pipe to the play command
         try:
             self.process.stdin.write(data)
         except:
-            self.process = subprocess.Popen(self.initial_values['command'],
-                                            shell=True,
-                                            bufsize=self.initial_values['buf_size'],
-                                            stdin=subprocess.PIPE)
-            self.alsamixer = alsaaudio.Mixer(control=self.initial_values['alsa_control'],
-                                             id=self.initial_values['alsa_id'],
-                                             cardindex=self.initial_values['alsa_cardindex'])
+            self.startup()
             self.process.stdin.write(data)
 
     def volume(self, new_volume):
+        if not config.getboolean('alsa', 'enabled'):
+            return
+
         # normalize volume
         volume = float(new_volume) / 127.0
 
@@ -103,6 +86,7 @@ class AutoAcceptSingleAudioAgent(BTAgent):
     def __init__(self, connect_callback, disconnect_callback):
         BTAgent.__init__(self, cb_notify_on_authorize=self.auto_accept_one)
         self.adapter = BTAdapter(config.get('bluez', 'device_path'))
+        self.adapter.set_property('Discoverable', config.getboolean('bluez', 'discoverable'))
         self.allowed_uuids = [ SERVICES["AdvancedAudioDistribution"].uuid, SERVICES["AVRemoteControl"].uuid ]
         self.connected = None
         self.tracked_devices =  []
@@ -111,6 +95,9 @@ class AutoAcceptSingleAudioAgent(BTAgent):
         self.update_discoverable()
 
     def update_discoverable(self):
+        if not config.getboolean('bluez', 'discoverable'):
+            return
+
         if bool(self.connected):
             print("Hiding adapter from all devices.")
             self.adapter.set_property('Discoverable', False)

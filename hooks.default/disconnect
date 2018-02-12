@@ -1,0 +1,3 @@
+#!/bin/bash -x
+
+ogg123 /usr/share/sounds/freedesktop/stereo/service-logout.oga
