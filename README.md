@@ -64,7 +64,7 @@ Changes in volume are detected via messages from the [AVRCP](https://en.wikipedi
 
 ### Bluetooth device class
 
-Some devices may filter out BT-Speaker and require the bluetooth device class to be expicitly set. Although BT-Manager does not support to change the device class itself, you can change it manually after launching BT-Speaker.
+Some devices may filter out BT-Speaker and require the bluetooth device class to be expicitly set. Although BT-Speaker does not support to change the device class itself, you can change it manually after launching BT-Speaker.
 
 ```ini
 pi@raspberrypi:~ $ sudo hciconfig hci0 class 0x240408
