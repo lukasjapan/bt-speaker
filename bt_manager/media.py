@@ -1,9 +1,9 @@
 from __future__ import unicode_literals
 
-from interface import BTSimpleInterface, BTInterface
+from .interface import BTSimpleInterface, BTInterface
 # from manager import BTManager
 # from adapter import BTAdapter
-from exceptions import BTDeviceNotSpecifiedException
+from .exceptions import BTDeviceNotSpecifiedException
 import dbus.service
 
 

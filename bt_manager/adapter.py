@@ -1,6 +1,6 @@
 from __future__ import unicode_literals
 
-from interface import BTInterface
+from .interface import BTInterface
 
 class BTAdapter(BTInterface):
     """
