@@ -85,8 +85,11 @@ class AutoAcceptSingleAudioAgent(BTAgent):
             self.disconnect_callback()
 
 def setup_bt():
-    # register sink and media endpoint
+    # register  media endpoint
     media = BTMedia(config.get('bluez', 'device_path'))
+
+    # start pulseaudio daemonize
+    subprocess.Popen(config.get('pulseaudio', 'start_command'), shell=True).communicate()
 
     def connect():
         subprocess.Popen(config.get('bt_speaker', 'connect_command'), shell=True).communicate()
@@ -94,6 +97,8 @@ def setup_bt():
     def disconnect():
         # sink.close_transport()
         subprocess.Popen(config.get('bt_speaker', 'disconnect_command'), shell=True).communicate()
+
+
 
     # setup bluetooth agent (that manages connections of devices)
     agent = AutoAcceptSingleAudioAgent(connect, disconnect)
@@ -121,6 +126,7 @@ if __name__ == '__main__':
     try:
         run()
     except KeyboardInterrupt:
+
         print('KeyboardInterrupt')
     except Exception as e:
         print(e.message)
