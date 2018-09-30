@@ -2,7 +2,7 @@
 
 # ogg123 /usr/share/sounds/freedesktop/stereo/service-login.oga
 # aplay sounds/connect.wav
-espeak-ng -s 140 "device connected"
+espeak-ng "device connected"
 
 # disconnect wifi to prevent dropouts - TODO: check what permissions bt-speaker might need for this (netdev group?)
 # ifconfig wlan0 down &
