@@ -95,7 +95,6 @@ def setup_bt():
         subprocess.Popen(config.get('bt_speaker', 'connect_command'), shell=True).communicate()
 
     def disconnect():
-        # sink.close_transport()
         subprocess.Popen(config.get('bt_speaker', 'disconnect_command'), shell=True).communicate()
 
 
@@ -105,6 +104,8 @@ def setup_bt():
     manager = BTAgentManager()
     manager.register_agent(agent._path, "NoInputNoOutput")
     manager.request_default_agent(agent._path)
+    
+    disconnect()
 
 def run():
     # Initialize the DBus SystemBus
