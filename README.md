@@ -13,7 +13,7 @@ sudo -i
 bash <(curl -s https://raw.githubusercontent.com/nuthub/bt-speaker/master/install.sh)
 ```
 
-For details refer to the comments in the [install script](https://github.com/lukasjapan/nuthub/blob/master/install.sh).
+For details refer to the comments in the [install script](https://github.com/nuthub/bt-speaker/blob/master/install.sh).
 
 Depending on your application, you might also want to send all audio to the headphone jack.
 This can be done by `raspi-config`:
