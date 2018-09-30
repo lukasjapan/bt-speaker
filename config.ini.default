@@ -1,4 +1,5 @@
 [bt_speaker]
+pin_code=6699
 connect_command = /etc/bt_speaker/hooks/connect
 disconnect_command = /etc/bt_speaker/hooks/disconnect
 
