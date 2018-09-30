@@ -1,9 +1,7 @@
 #!/usr/bin/python
 
 from gi.repository import GLib
-from bt_manager.audio import SBCAudioSink
 from bt_manager.media import BTMedia
-from bt_manager.device import BTDevice
 from bt_manager.agent import BTAgent, BTAgentManager
 from bt_manager.adapter import BTAdapter
 from bt_manager.serviceuuids import SERVICES
@@ -13,7 +11,6 @@ import dbus
 import dbus.mainloop.glib
 import signal
 import subprocess
-import alsaaudio
 import math
 import configparser
 import io
@@ -24,58 +21,6 @@ SCRIPT_PATH = os.path.dirname(os.path.realpath(__file__))
 config = configparser.SafeConfigParser()
 config.read(SCRIPT_PATH + '/config.ini.default')
 config.read('/etc/bt_speaker/config.ini')
-
-class PipedSBCAudioSinkWithAlsaVolumeControl(SBCAudioSink):
-    """
-    An audiosink that pipes the decoded output to a command via stdin.
-    The class also sets the volume of an alsadevice
-    """
-    def __init__(self):
-        SBCAudioSink.__init__(self, path='/endpoint/a2dpsink')
-        self.startup()
-
-    def startup(self):
-        # Start process
-        self.process = subprocess.Popen(
-            config.get('bt_speaker', 'play_command'),
-            shell=True,
-            bufsize=2560,
-            stdin=subprocess.PIPE
-        )
-
-        if config.getboolean('alsa', 'enabled'):
-            # Hook into alsa service for volume control
-            self.alsamixer = alsaaudio.Mixer(
-                control=config.get('alsa', 'mixer'),
-                id=int(config.get('alsa', 'id')),
-                cardindex=int(config.get('alsa', 'cardindex'))
-            )
-
-    def raw_audio(self, data):
-        # pipe to the play command
-        try:
-            self.process.stdin.write(data)
-        except:
-            # try to restart process on failure
-            self.startup()
-            self.process.stdin.write(data)
-
-    def volume(self, new_volume):
-        if not config.getboolean('alsa', 'enabled'):
-            return
-
-        # normalize volume
-        volume = float(new_volume) / 127.0
-
-        print("Volume changed to %i%%" % (volume * 100.0))
-
-        # it looks like the value passed to alsamixer sets the volume by 'power level'
-        # to adjust to the (human) perceived volume, we have to square the volume
-        # @todo check if this only applies to the raspberry pi or in general (or if i got it wrong)
-        volume = math.pow(volume, 1.0/3.0)
-
-        # alsamixer takes a percent value as integer from 0-100
-        self.alsamixer.setvolume(int(volume * 100.0))
 
 class AutoAcceptSingleAudioAgent(BTAgent):
     """
@@ -140,23 +85,27 @@ class AutoAcceptSingleAudioAgent(BTAgent):
             self.disconnect_callback()
 
 def setup_bt():
-    # register sink and media endpoint
-    sink = PipedSBCAudioSinkWithAlsaVolumeControl()
+    # register  media endpoint
     media = BTMedia(config.get('bluez', 'device_path'))
-    media.register_endpoint(sink._path, sink.get_properties())
+
+    # start pulseaudio daemonize
+    subprocess.Popen(config.get('pulseaudio', 'start_command'), shell=True).communicate()
 
     def connect():
         subprocess.Popen(config.get('bt_speaker', 'connect_command'), shell=True).communicate()
 
     def disconnect():
-        sink.close_transport()
         subprocess.Popen(config.get('bt_speaker', 'disconnect_command'), shell=True).communicate()
+
+
 
     # setup bluetooth agent (that manages connections of devices)
     agent = AutoAcceptSingleAudioAgent(connect, disconnect)
     manager = BTAgentManager()
     manager.register_agent(agent._path, "NoInputNoOutput")
     manager.request_default_agent(agent._path)
+    
+    disconnect()
 
 def run():
     # Initialize the DBus SystemBus
@@ -178,6 +127,7 @@ if __name__ == '__main__':
     try:
         run()
     except KeyboardInterrupt:
+
         print('KeyboardInterrupt')
     except Exception as e:
         print(e.message)

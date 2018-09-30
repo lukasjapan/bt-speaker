@@ -1,11 +1,11 @@
 #!/bin/bash +x
 set -e
 
-# This script has been tested with the "2017-11-29-raspbian-stretch-lite.img" image.
+# This script has been tested with the "2018-06-27-raspbian-stretch-lite.img" image.
 
 echo "Installing dependencies..."
 apt-get update
-apt-get --yes --force-yes install git bluez python python-gobject python-cffi python-dbus python-alsaaudio python-configparser sound-theme-freedesktop vorbis-tools
+apt-get --yes --force-yes install git bluez python python-gobject python-cffi python-dbus python-configparser pulseaudio-module-bluetooth espeak-ng
 echo "done."
 
 # Add btspeaker user if not exist already
