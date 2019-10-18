@@ -49,4 +49,5 @@ echo "done."
 
 # Finished
 echo
-echo "BT-Speaker has been installed."
+echo "setting up audio output to 3.5mm"
+sudo amixer cset numid=3 1 
