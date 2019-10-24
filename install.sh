@@ -11,7 +11,7 @@ echo "done."
 # Add btspeaker user if not exist already
 echo
 echo "Adding btspeaker user..."
-id -u btspeaker &>/dev/null || useradd btspeaker -G audio
+id -u btspeaker &>/dev/null || useradd -m btspeaker -G audio
 # Also add user to bluetooth group if it exists (required in debian stretch)
 getent group bluetooth &>/dev/null && usermod -a -G bluetooth btspeaker
 echo "done."
