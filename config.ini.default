@@ -6,6 +6,7 @@ disconnect_command = /etc/bt_speaker/hooks/disconnect
 [bluez]
 device_path = /org/bluez/hci0
 discoverable = yes
+pincode=69696969
 
 [alsa]
 enabled = yes

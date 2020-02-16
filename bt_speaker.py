@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/usr/bin/python2
 
 from gi.repository import GLib
 from bt_manager.audio import SBCAudioSink
@@ -8,6 +8,7 @@ from bt_manager.agent import BTAgent, BTAgentManager
 from bt_manager.adapter import BTAdapter
 from bt_manager.serviceuuids import SERVICES
 from bt_manager.uuid import BTUUID
+
 
 import dbus
 import dbus.mainloop.glib
@@ -50,6 +51,7 @@ class PipedSBCAudioSinkWithAlsaVolumeControl(SBCAudioSink):
                 id=int(config.get('alsa', 'id')),
                 cardindex=int(config.get('alsa', 'cardindex'))
             )
+            
 
     def raw_audio(self, data):
         # pipe to the play command
@@ -85,10 +87,15 @@ class AutoAcceptSingleAudioAgent(BTAgent):
     connecting devices but the easiest to implement.
     """
     def __init__(self, connect_callback, disconnect_callback):
-        BTAgent.__init__(self, cb_notify_on_authorize=self.auto_accept_one)
+        BTAgent.__init__(self,auto_authorize_connections=False,
+                 cb_notify_on_authorize=self.auto_accept_one,
+                 default_pin_code=config.get('bluez', 'pincode'),
+                 default_pass_key=config.get('bluez', 'pincode'))
         self.adapter = BTAdapter(config.get('bluez', 'device_path'))
         self.adapter.set_property('Discoverable', config.getboolean('bluez', 'discoverable'))
-        self.allowed_uuids = [ SERVICES["AdvancedAudioDistribution"].uuid, SERVICES["AVRemoteControl"].uuid ]
+        self.allowed_uuids = [ SERVICES["AdvancedAudioDistribution"].uuid ] 
+        self.allowed_uuids.append(SERVICES["AVRemoteControl"].uuid)
+        #self.allowed_uuids.append(SERVICES["Headset"].uuid)
         self.connected = None
         self.tracked_devices =  []
         self.connect_callback = connect_callback
@@ -107,10 +114,14 @@ class AutoAcceptSingleAudioAgent(BTAgent):
             self.adapter.set_property('Discoverable', True)
 
     def auto_accept_one(self, method, device, uuid):
-        if not BTUUID(uuid).uuid in self.allowed_uuids: return False
+ 
         if self.connected and self.connected != device:
             print("Rejecting device, because another one is already connected. connected_device=%s, device=%s" % (self.connected, device))
             return False
+
+#        if not BTUUID(uuid).uuid in self.allowed_uuids: 
+#            print  "no uuid in self.allowed_uuids return false" 
+#            return False
 
         # track connection state of the device (is there a better way?)
         if not device in self.tracked_devices:
@@ -120,7 +131,6 @@ class AutoAcceptSingleAudioAgent(BTAgent):
                                                   signal_name='PropertiesChanged',
                                                   dbus_interface='org.freedesktop.DBus.Properties',
                                                   path_keyword='device')
-
         return True
 
     def _track_connection_state(self, addr, properties, signature, device):
@@ -144,7 +154,6 @@ def setup_bt():
     sink = PipedSBCAudioSinkWithAlsaVolumeControl()
     media = BTMedia(config.get('bluez', 'device_path'))
     media.register_endpoint(sink._path, sink.get_properties())
-
     def connect():
         subprocess.Popen(config.get('bt_speaker', 'connect_command'), shell=True).communicate()
 
