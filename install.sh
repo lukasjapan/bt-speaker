@@ -29,16 +29,20 @@ if [ -d bt-speaker ]; then
   cd bt-speaker && git pull && git checkout ${1:master}
 else
   echo "Downloading bt-speaker..."
-  git clone https://github.com/lukasjapan/bt-speaker.git
+  git clone https://github.com/amerinoj/bt-speaker.git
   cd bt-speaker && git checkout ${1:master}
 fi
 echo "done."
 
 # Prepare default config
 mkdir -p /etc/bt_speaker/hooks
+rm /etc/bt_speaker/config.ini
 ln /opt/bt-speaker/config.ini.default /etc/bt_speaker/config.ini
+rm /etc/bt_speaker/hooks/connect
 ln /opt/bt-speaker/hooks.default/connect /etc/bt_speaker/hooks/connect
+rm /etc/bt_speaker/hooks/disconnect
 ln /opt/bt-speaker/hooks.default/disconnect /etc/bt_speaker/hooks/disconnect
+rm /etc/systemd/system/bt_speaker.service
 ln /opt/bt-speaker/bt_speaker.service /etc/systemd/system/bt_speaker.service
 
 
