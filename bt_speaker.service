@@ -1,12 +1,19 @@
 [Unit]
 Description="Simple bluetooth speaker for the Raspberry Pi"
+After=multi-user.target
+
 
 [Service]
-TimeoutStartSec=0
-WorkingDirectory=/opt/bt-speaker
-ExecStart=/opt/bt-speaker/bt_speaker.py
+Type=simple
+WorkingDirectory=/opt/bt-speaker/
+#ExecStartPre=pulseaudio -D
+ExecStart=/usr/bin/python /opt/bt-speaker/bt_speaker.py
 Restart=always
+RestartSec=0s
 User=btspeaker
+#StandardOutput=syslog
+#StandardError=syslog
+SyslogIdentifier=bt-speaker
 
 [Install]
 WantedBy=multi-user.target

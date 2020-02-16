@@ -8,13 +8,6 @@ if [ "$EUID" -ne 0 ]
   exit
 fi
 ###############
-echo "Checking if bt_speaker.service is running..."
-if [ "`systemctl is-active bt_speaker.service`" == "active" ]; then
-  echo  "Stop service .."
-  systemctl stop bt_speaker.service
-  systemctl disable bt_speaker.service
-fi
-#################################
 echo "Installing dependencies..."
 apt-get update
 apt-get --yes --force-yes install git bluez python python-gobject python-cffi python-dbus python-alsaaudio python-configparser sound-theme-freedesktop vorbis-tools pulseaudio pulseaudio-module-bluetooth
@@ -39,49 +32,19 @@ else
   git clone https://github.com/amerinoj/bt-speaker.git
   cd bt-speaker && git checkout ${1:master}
 fi
-echo "done."  
+echo "done."
 
 # Prepare default config
 mkdir -p /etc/bt_speaker/hooks
-Etcfg="/etc/bt_speaker/config.ini"      
-Hookc="/etc/bt_speaker/hooks/connect"
-Hookd="/etc/bt_speaker/hooks/disconnect"
-Srvf="/etc/systemd/system/bt_speaker.service"
-if test -f "$Etcfg"; then
-    rm $Etcfg
-fi
-if test -f "$Hookc"; then
-    rm $Hookc
-fi
-if test -f "$Hookd"; then
-    rm $Hookd
-fi
-if test -f "$Srvf"; then
-    rm $Srvf
-fi
+rm /etc/bt_speaker/config.ini
+ln /opt/bt-speaker/config.ini.default /etc/bt_speaker/config.ini
+rm /etc/bt_speaker/hooks/connect
+ln /opt/bt-speaker/hooks.default/connect /etc/bt_speaker/hooks/connect
+rm /etc/bt_speaker/hooks/disconnect
+ln /opt/bt-speaker/hooks.default/disconnect /etc/bt_speaker/hooks/disconnect
+rm /etc/systemd/system/bt_speaker.service
+ln /opt/bt-speaker/bt_speaker.service /etc/systemd/system/bt_speaker.service
 
-ln /opt/bt-speaker/config.ini.default $Etcfg
-ln /opt/bt-speaker/hooks.default/connect $Hookc
-ln /opt/bt-speaker/hooks.default/disconnect $Hookd
-
-
-# Config pulse audio
-Pulsedef="/etc/pulse/default.pa"
-Pulsenew="/home/btspeaker/.config/pulse/default.pa"
-if test -f "$Pulsedef"; then
-	sudo -u btspeaker cp $Pulsedef $Pulsenew
-	if  grep -q "load-module module-alsa-sink device=" "$Pulsedef" ; then
-                 sed -i "s/load-module module-alsa-sink device=             \
-                 /load-module module-alsa-sink device=hw:0,0/g" "$Pulsenew"
-        else
-                 echo -e "load-module module-alsa-sink device=hw:0,0" >> "$Pulsenew"
-        fi
-else
-        echo -e "ERROR DEFAULT PULSEAUDIO CONFIG NO FOUND"
-fi
-#disable to default
-sed -i "/load-module module-bluetooth-policy/c\#load-module module-bluetooth-policy" "$Pulsenew"
-sed -i "/load-module module-bluetooth-discover/c\#load-module module-bluetooth-discover" "$Pulsenew"
 
 
 #Menu
@@ -90,11 +53,11 @@ while [[ $opt != "End" ]]; do
 	#clear
 	echo '####################  Menu Config options  ####################'
 	PS3='Config options: '
-	options=("Audio" "Pincode" "Bluetooth config" "Bluetooth Enable/Disable" "Headset Enable/Disable" "End")
+	options=("Audio" "Enable Headset" "Pincode" "Bluetooth config" "Bluetooth Enable/Disable" "End")
 	select opt in "${options[@]}"
 	do
 	   case $opt in
-		"Audio")
+		"Audio Output")
 		    #select audio output
                         echo -e "-------Audio config integrate Raspbery card-------\n"
 			AudioOuput="auto,headphones,hdmi,go back"
@@ -131,6 +94,36 @@ while [[ $opt != "End" ]]; do
 		    break
 		    ;;
 
+                "Enable Headset")
+                        #Enable/Disable headset  
+                        echo "!!!!!Make sure you have a mic for the input in your system!!!!"          
+                        heopt="disable,enable,Go back"
+                        oldIFS=$IFS
+                        IFS=$','
+                        choices=($heopt)
+                        IFS=$oldIFS
+                        PS3="Select your option "
+                        select answer in "${choices[@]}"; do
+                            for item in "${choices[@]}"; do
+                               if [[ $item == $answer ]]; then
+                                    echo "Bluetooth internal:"$answer
+                                    break 2;
+                               fi
+                            done
+                        done
+
+                        if [[ $answer == "disable" ]]; then
+                                #disable internal raspberry bluetooth
+                                echo "blacklist btbcm" >> /etc/modprobe.d/bluetooth-blacklist.conf 
+                                echo "blacklist hci_uart" >> /etc/modprobe.d/bluetooth-blacklist.conf   
+                        fi
+                        if [[ $answer == "enable" ]]; then
+                                #enable internal raspberry bluetooth
+                                rm /etc/modprobe.d/bluetooth-blacklist.conf 
+                        fi
+
+                    break
+                    ;;
 
 		"Pincode")
 			#config pincode
@@ -212,55 +205,28 @@ while [[ $opt != "End" ]]; do
 			    done
 			done
 			Btoutput=$answer
-			if [[ $Btoutput == "disable" ]]; then
-				#disable internal raspberry bluetooth
-				echo "blacklist btbcm" >> /etc/modprobe.d/bluetooth-blacklist.conf 
-				echo "blacklist hci_uart" >> /etc/modprobe.d/bluetooth-blacklist.conf	
-			fi
 			if [[ $Btoutput == "enable" ]]; then
-				#enable internal raspberry bluetooth
-				rm /etc/modprobe.d/bluetooth-blacklist.conf 
+			   #disable pulseaudio daemon
+		           Pulsedef="/etc/pulse/default.pa"
+                        	if test -f "$Pulsedef"; then
+                                   if  grep -q "load-module module-alsa-sink device=" "$Pulsedef" ; then
+                                        sed -i "s/load-module module-alsa-sink device=             \
+                                        /load-module module-alsa-sink device=hw:0,0/g" "$Pulsedef"
+                                   else
+                                     echo -e "load-module module-alsa-sink device=hw:0,0" >> "$Pulsedef"
+                                   fi
+                            	else
+                         	    echo -e "load-module module-alsa-sink device=hw:0,0" >> "$Pulsedef"
+				fi	
+			fi
+			if [[ $Btoutput == "disable" ]]; then
+				#enable pulseaudio daemon
+
+				 
 			fi
 
                     break
                     ;;
-                "Headset Enable/Disable")
-                        #Enable/Disable headset in pulseaudio  
-                        echo -e "\n!!! Before enable headset profile make sure have a mic in your system !!!\n"          
-                        hsopt="disable,enable,Go back"
-                        oldIFS=$IFS
-                        IFS=$','
-                        choices=($hsopt)
-                        IFS=$oldIFS
-                        PS3="Select your option "
-                        select answer in "${choices[@]}"; do
-                            for item in "${choices[@]}"; do
-                               if [[ $item == $answer ]]; then
-                                    echo "Headset:"$answer
-                                    break 2;
-                               fi
-                            done
-                        done
-			if [[ $answer == "Go back" ]]; then
-			  break
-          		fi
-                        if [[ $answer == "disable" ]]; then
-                          #disable bluetooth pulse audio profile
-                          sed -i "/load-module module-bluetooth-policy/c\#load-module module-bluetooth-policy" "$Pulsenew"
-			  sed -i "/load-module module-bluetooth-discover/c\#load-module module-bluetooth-discover" "$Pulsenew"
-			  sed -i "/ExecStartPre=pulseaudio -D/c\#ExecStartPre=pulseaudio -D" /opt/bt-speaker/bt_speaker.service
-                        fi
-                        if [[ $answer == "enable" ]]; then
-                            #enable bluetooth pulse audio profile
-                           sed -i "/load-module module-bluetooth-policy/c\load-module module-bluetooth-policy" "$Pulsenew"
-			   sed -i "/load-module module-bluetooth-discover/c\load-module module-bluetooth-discover" "$Pulsenew"
-			   sed -i "/ExecStartPre=pulseaudio -D/c\ExecStartPre=pulseaudio -D" /opt/bt-speaker/bt_speaker.service
-                        fi
-
-                    break
-                    ;;
-
-
 		"End")
 		    break
 		    ;;
@@ -273,10 +239,13 @@ done
 # Install and start bt-speaker daemon
 echo
 echo "Registering and starting bt-speaker with systemd..."
-  ln /opt/bt-speaker/bt_speaker.service /etc/systemd/system/bt_speaker.service
-  systemctl daemon-reload
-  systemctl enable bt_speaker.service
+systemctl enable bt_speaker.service
+systemctl daemon-reload
+if [ "`systemctl is-active bt_speaker.service`" != "active" ]; then
   systemctl start bt_speaker.service
+else
+  systemctl restart bt_speaker.service
+fi
   systemctl status bt_speaker.service  --full --no-pager
 echo "done."
 
@@ -284,4 +253,3 @@ echo "done."
 echo
 echo "BT-Speaker has been installed."
 echo "Reboot the system  to finish."
-
