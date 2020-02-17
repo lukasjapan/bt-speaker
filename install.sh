@@ -118,13 +118,13 @@ while [[ $opt != "End" ]]; do
 			Aoutput=$answer
 
 			if [[ $Aoutput == "auto" ]]; then
-			     amixer cset numid=3 0
+			     sudo -u btspeaker amixer cset numid=3 0
 			else
 			     if [[ $Aoutput == "hdmi" ]]; then
-				 amixer cset numid=3 2
+				 sudo -u btspeaker amixer cset numid=3 2
 			     else
 				 if [[ $Aoutput == "headphones" ]]; then
-				     amixer cset numid=3 1
+				     sudo -u btspeaker amixer cset numid=3 1
 				 fi
 			     fi	
 			fi
@@ -186,11 +186,12 @@ while [[ $opt != "End" ]]; do
 			   [Nn]* ) break;;
         		    * ) echo "Please answer yes or no.";;
     		     	   esac
-			  done	 		
+			  done
+			  else
+				(hcitool cmd 0x3F 0x01C 0x01 0x02 0x00 0x01 0x01 &)	 		
 			fi
 		 	 #change config
                           sed -i 's/hci./'$hcioutput'/g' /opt/bt-speaker/config.ini.default
-
 		    break
 		    ;;
 
