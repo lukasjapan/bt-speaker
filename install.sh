@@ -70,10 +70,8 @@ Pulsedef="/etc/pulse/default.pa"
 Pulsenew="/home/btspeaker/.config/pulse/default.pa"
 if test -f "$Pulsedef"; then
 
-        if ! [ -d /home/btspeaker/.config/ ]; then
-           sudo -u btspeaker mkdir /home/btspeaker/.config
-        fi
-
+        sudo -u btspeaker pulseaudio &
+        sleep 2
         sudo -u btspeaker cp $Pulsedef $Pulsenew
 
 	if  grep -q "load-module module-alsa-sink device=" "$Pulsedef" ; then
