@@ -87,7 +87,8 @@ fi
 #disable to default
 sed -i "/load-module module-bluetooth-policy/c\#load-module module-bluetooth-policy" "$Pulsenew"
 sed -i "/load-module module-bluetooth-discover/c\#load-module module-bluetooth-discover" "$Pulsenew"
-
+sed -i "/load-module module-bluetooth-policy/c\#load-module module-bluetooth-policy" "/etc/pulse/default.pa"
+sed -i "/load-module module-bluetooth-discover/c\#load-module module-blueth-discover" "/etc/pulse/default.pa"
 
 #Menu
 opt=""
