@@ -17,7 +17,7 @@ fi
 #################################
 echo "Installing dependencies..."
 apt-get update
-apt-get --yes --force-yes install git bluez python python-gobject python-cffi python-dbus python-alsaaudio python-configparser sound-theme-freedesktop vorbis-tools pulseaudio pulseaudio-module-bluetooth
+apt-get --yes --force-yes install git bluez python python-gobject python-cffi python-dbus python-alsaaudio python-configparser sound-theme-freedesktop vorbis-tools libasound2-dev libavformat-dev libavcodec-dev  pulseaudio pulseaudio-module-bluetooth
 echo "done."
 
 # Add btspeaker user if not exist already
