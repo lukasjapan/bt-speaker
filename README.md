@@ -8,7 +8,7 @@ Quick Installation for Raspbian:
 
 ```bash
 sudo -i
-bash <(curl -s https://raw.githubusercontent.com/lukasjapan/bt-speaker/master/install.sh)
+bash <(curl -s https://raw.githubusercontent.com/amerinoj/bt-speaker/master/install.sh)
 ```
 
 For details refer to the comments in the [install script](https://github.com/lukasjapan/bt-speaker/blob/master/install.sh).
