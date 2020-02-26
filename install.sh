@@ -188,6 +188,10 @@ while [[ $opt != "End" ]]; do
 			     #disable internal raspberry bluetooth
                              echo "blacklist btbcm" >> /etc/modprobe.d/bluetooth-blacklist.conf 
                              echo "blacklist hci_uart" >> /etc/modprobe.d/bluetooth-blacklist.conf
+                             echo
+                             echo "NOTICE: "
+                             echo "REBOOT THE SYSTEM and LAUNCH THE INSTALLATION AGAIN"
+                             echo "RE-ENTER AGAIN IN [ Bluetooth config ]"
 			     break;;
 			   [Nn]* ) break;;
         		    * ) echo "Please answer yes or no.";;
@@ -222,7 +226,11 @@ while [[ $opt != "End" ]]; do
 			if [[ $Btoutput == "disable" ]]; then
 				#disable internal raspberry bluetooth
 				echo "blacklist btbcm" >> /etc/modprobe.d/bluetooth-blacklist.conf 
-				echo "blacklist hci_uart" >> /etc/modprobe.d/bluetooth-blacklist.conf	
+				echo "blacklist hci_uart" >> /etc/modprobe.d/bluetooth-blacklist.conf
+                                echo
+                                echo "NOTICE:"
+                                echo "REBOOT THE SYSTEM and LAUNCH THE INSTALLATION AGAIN"
+                                echo "RE-ENTER AGAIN IN [ Bluetooth config ]" 	
 			fi
 			if [[ $Btoutput == "enable" ]]; then
 				#enable internal raspberry bluetooth
