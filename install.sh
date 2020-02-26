@@ -42,6 +42,9 @@ fi
 echo "done."  
 
 # Prepare default config
+sudo -u btspeaker pulseaudio  --start
+sudo -u btspeaker pulseaudio  --kill 
+
 mkdir -p /etc/bt_speaker/hooks
 Etcfg="/etc/bt_speaker/config.ini"      
 Hookc="/etc/bt_speaker/hooks/connect"
@@ -70,8 +73,6 @@ Pulsedef="/etc/pulse/default.pa"
 Pulsenew="/home/btspeaker/.config/pulse/default.pa"
 if test -f "$Pulsedef"; then
 
-        sudo -u btspeaker pulseaudio &
-        sleep 2
         sudo -u btspeaker cp $Pulsedef $Pulsenew
 
 	if  grep -q "load-module module-alsa-sink device=" "$Pulsedef" ; then
