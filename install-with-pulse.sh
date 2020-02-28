@@ -17,7 +17,7 @@ fi
 #################################
 echo "Installing dependencies..."
 apt-get update
-apt-get --yes --force-yes install git bluez python python-gobject python-cffi python-dbus python-alsaaudio python-configparser sound-theme-freedesktop vorbis-tools libasound2-dev libavformat-dev libavcodec-dev  pulseaudio pulseaudio-module-bluetooth
+apt-get --yes --force-yes install git bluez python python-gobject python-cffi python-dbus python-alsaaudio python-configparser sound-theme-freedesktop vorbis-tools libasound2-dev libavformat-dev libavcodec-dev  pulseaudio pulseaudio-module-bluetooth python-gobject python-gobject-2 pavucontrol
 echo "done."
 
 # Add btspeaker user if not exist already
@@ -26,6 +26,8 @@ echo "Adding btspeaker user..."
 id -u btspeaker &>/dev/null || useradd -m btspeaker -G audio
 # Also add user to bluetooth group if it exists (required in debian stretch)
 getent group bluetooth &>/dev/null && usermod -a -G bluetooth btspeaker
+getent group lp &>/dev/null && usermod -a -G lp btspeaker
+getent group pulse-access &>/dev/null && usermod -a -G pulse-access btspeaker
 echo "done."
 
 # Download bt-speaker to /opt (or update if already present)
@@ -67,20 +69,70 @@ ln /opt/bt-speaker/config.ini.default $Etcfg
 ln /opt/bt-speaker/hooks.default/connect $Hookc
 ln /opt/bt-speaker/hooks.default/disconnect $Hookd
 
+# Config bluetooth audio
+if  [ -f /etc/bluetooth/audio.conf ]; then
 
+	if  grep -q "Enable=Source,Sink,Headset,Gateway,Control,Media,Socket" "/etc/bluetooth/audio.conf" ; then
+          echo "string found"
+        else
+          printf "\nEnable=Source,Sink,Headset,Gateway,Control,Media,Socket\n" >> /etc/bluetooth/audio.conf
+          echo "string no found"
+        fi
+
+else
+    echo "creating ... /etc/bluetooth/audio.conf "
+    printf "[General]\nEnable=Source,Sink,Headset,Gateway,Control,Media,Socket\n" >> /etc/bluetooth/audio.conf
+   
+fi
+# Config resample-method
+if  [ -f /etc/pulse/daemon.conf ] ; then
+
+	if  grep -q "resample-method" "/etc/pulse/daemon.conf" ; then
+          echo " change resample-method  "
+          sed -i "/resample-method =/c\resample-method = trivial" /etc/pulse/daemon.conf
+        else
+          echo " resample-method = no found "
+          echo "resample-method = trivial" >> /etc/pulse/daemon.conf
+        fi
+
+fi
+
+# Config load-module module-udev-detect
+if  [ -f /etc/pulse/system.pa ] ; then
+
+	if  grep -q "load-module module-udev-detect" "/etc/pulse/system.pa" ; then
+          echo " change load-module module-udev-detect  "
+          sed -i "/load-module module-udev-detect/c\load-module module-udev-detect tsched=0" /etc/pulse/system.pa
+        else
+          echo " load-module module-udev-detect no found "
+        fi
+
+fi
+# Config autospawn
+if  [ -f /etc/pulse/client.conf ] ; then
+
+	if  grep -q "autospawn =" "/etc/pulse/client.conf" ; then
+          echo " change autospawn = no "
+          sed -i "/autospawn =/c\autospawn = no" /etc/pulse/client.conf
+        else
+          echo " autospawn no found "
+        fi
+
+fi
 # Config pulse audio
 Pulsedef="/etc/pulse/default.pa"
 Pulsenew="/home/btspeaker/.config/pulse/default.pa"
 if test -f "$Pulsedef"; then
 
-        sudo -u btspeaker cp $Pulsedef $Pulsenew
+
 
 	if  grep -q "load-module module-alsa-sink device=" "$Pulsedef" ; then
                  sed -i "s/load-module module-alsa-sink device=             \
-                 /load-module module-alsa-sink device=hw:0,0/g" "$Pulsenew"
+                 /load-module module-alsa-sink device=hw:0,0/g" "$Pulsedef"
         else
-                 echo -e "load-module module-alsa-sink device=hw:0,0" >> "$Pulsenew"
+                 echo -e "load-module module-alsa-sink device=hw:0,0" >> "$Pulsedef"
         fi
+	sudo -u btspeaker cp $Pulsedef $Pulsenew
 else
         echo -e "ERROR DEFAULT PULSEAUDIO CONFIG NO FOUND"
 fi
