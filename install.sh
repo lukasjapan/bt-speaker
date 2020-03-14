@@ -1,7 +1,7 @@
 #!/bin/bash +x
 set -e
 
-# This script has been tested with the "2017-11-29-raspbian-stretch-lite.img" image.
+# This script has been tested with the "2020-02-13-raspbian-buster-lite.img" image.
 
 echo "Installing dependencies..."
 apt-get update
