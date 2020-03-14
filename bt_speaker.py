@@ -145,6 +145,9 @@ def setup_bt():
     media = BTMedia(config.get('bluez', 'device_path'))
     media.register_endpoint(sink._path, sink.get_properties())
 
+    def startup():
+        subprocess.Popen(config.get('bt_speaker', 'startup_command'), shell=True).communicate()
+
     def connect():
         subprocess.Popen(config.get('bt_speaker', 'connect_command'), shell=True).communicate()
 
@@ -157,6 +160,8 @@ def setup_bt():
     manager = BTAgentManager()
     manager.register_agent(agent._path, "NoInputNoOutput")
     manager.request_default_agent(agent._path)
+
+    startup()
 
 def run():
     # Initialize the DBus SystemBus

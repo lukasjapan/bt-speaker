@@ -1,0 +1,6 @@
+#!/bin/bash -x
+#
+# Commands to run after startup of bt_speaker
+
+# Disable simple secure pairing
+# btmgmt ssp off
