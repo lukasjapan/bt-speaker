@@ -1,8 +1,8 @@
 from __future__ import unicode_literals
 
-from interface import BTInterface
-from adapter import BTAdapter
-from exceptions import BTDeviceNotSpecifiedException
+from .interface import BTInterface
+from .adapter import BTAdapter
+from .exceptions import BTDeviceNotSpecifiedException
 
 
 class BTGenericDevice(BTInterface):

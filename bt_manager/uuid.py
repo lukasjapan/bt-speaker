@@ -1,5 +1,5 @@
 from __future__ import unicode_literals
-from exceptions import BTUUIDNotSpecifiedException
+from .exceptions import BTUUIDNotSpecifiedException
 
 
 _BASE_UUID = '00000000-0000-1000-8000-00805F9B34FB'

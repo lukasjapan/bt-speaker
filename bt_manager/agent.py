@@ -2,8 +2,8 @@ from __future__ import unicode_literals
 
 import dbus.service
 
-from exceptions import BTRejectedException
-from interface import BTInterface
+from .exceptions import BTRejectedException
+from .interface import BTInterface
 
 class BTAgentManager(BTInterface):
     def __init__(self):

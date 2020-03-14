@@ -99,7 +99,7 @@ class SBCCodec:
         try:
             self.codec = ffi.dlopen('./librtpsbc.so')
         except:
-            print 'Exception:', sys.exc_info()[0]
+            print('Exception:' + str(sys.exc_info()[0]))
 
         self.config = ffi.new('sbc_t *')
         self.ts = ffi.new('unsigned int *', 0)

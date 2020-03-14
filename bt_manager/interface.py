@@ -4,7 +4,7 @@ import dbus
 import types
 import pprint
 
-from exceptions import BTSignalNameNotRecognisedException
+from .exceptions import BTSignalNameNotRecognisedException
 
 class Signal():
     """

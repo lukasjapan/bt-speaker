@@ -1,6 +1,6 @@
 from __future__ import unicode_literals
 
-from uuid import BTUUID16
+from .uuid import BTUUID16
 
 __SDP = BTUUID16('0001', 'SDP', 'Bluetooth Core Specification')  # noqa
 __UDP = BTUUID16('0002', 'UDP', '[NO USE BY PROFILES]')  # noqa
