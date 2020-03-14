@@ -2,6 +2,8 @@
 
 A simple Bluetooth Speaker Daemon designed for the Raspberry Pi 3.
 
+BT-Speaker aims to _just work_ on a vanilla raspbian installation using pure ALSA.
+
 ## Installation
 
 Quick Installation for Raspbian:
@@ -20,6 +22,9 @@ This can be done by `raspi-config`:
 
 _Note_: Bt-speaker has been made with the default raspbian audio configuration in mind.
 If you are using external sound cards or have installed a sound daemon (like PulseAudio or Jack) you might need to adjust the config file accordingly.
+
+Having a sound daemon installed might even break things.
+So please keep in mind that BT-Speaker was made to avoid a heavy audio stack and will not officially support such setup.
 
 ## Usage
 
