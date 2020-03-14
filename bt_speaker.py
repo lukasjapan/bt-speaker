@@ -85,7 +85,7 @@ class AutoAcceptSingleAudioAgent(BTAgent):
     connecting devices but the easiest to implement.
     """
     def __init__(self, connect_callback, disconnect_callback):
-        BTAgent.__init__(self, default_pin_code=config.get('bt_speaker', 'pin_code'), default_pass_key=config.get('bt_speaker', 'pin_code'), cb_notify_on_authorize=self.auto_accept_one)
+        BTAgent.__init__(self, default_pin_code=config.get('bluez', 'pin_code') or '0000', cb_notify_on_authorize=self.auto_accept_one)
         self.adapter = BTAdapter(config.get('bluez', 'device_path'))
         self.adapter.set_property('Discoverable', config.getboolean('bluez', 'discoverable'))
         self.allowed_uuids = [ SERVICES["AdvancedAudioDistribution"].uuid, SERVICES["AVRemoteControl"].uuid ]
