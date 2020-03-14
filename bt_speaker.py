@@ -146,7 +146,6 @@ def setup_bt():
     media.register_endpoint(sink._path, sink.get_properties())
 
     def startup():
-        sink.close_transport()
         subprocess.Popen(config.get('bt_speaker', 'startup_command'), shell=True).communicate()
 
     def connect():
