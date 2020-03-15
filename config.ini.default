@@ -3,6 +3,7 @@ play_command = aplay -f cd -
 connect_command = /etc/bt_speaker/hooks/connect
 disconnect_command = /etc/bt_speaker/hooks/disconnect
 startup_command = /etc/bt_speaker/hooks/startup
+track_command = /etc/bt_speaker/hooks/track
 
 [bluez]
 device_path = /org/bluez/hci0
