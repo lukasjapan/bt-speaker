@@ -1,0 +1,11 @@
+#!/bin/bash -x
+
+# called if new track data is available
+# track data can be accessed from environment variables
+
+# echo New Track:
+# echo Title:  $TITLE
+# echo Artist: $ARTIST
+# echo Album: $ALBUM
+# echo Genre: $GENRE
+# echo

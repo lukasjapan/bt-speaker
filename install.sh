@@ -35,6 +35,7 @@ cp -n /opt/bt-speaker/config.ini.default /etc/bt_speaker/config.ini
 cp -n /opt/bt-speaker/hooks.default/connect /etc/bt_speaker/hooks/connect
 cp -n /opt/bt-speaker/hooks.default/disconnect /etc/bt_speaker/hooks/disconnect
 cp -n /opt/bt-speaker/hooks.default/startup /etc/bt_speaker/hooks/startup
+cp -n /opt/bt-speaker/hooks.default/track /etc/bt_speaker/hooks/track
 
 # Install and start bt-speaker daemon
 echo
