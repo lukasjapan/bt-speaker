@@ -174,13 +174,13 @@ def setup_bt():
     def track(data):
         command = config.get('bt_speaker', 'track_command')
         if not command: return
-        if str(data) == track.last: return
-        # dirty hack to prevent unnecessary double execution
-        track.last = str(data)
         env = dict()
         for key in data:
             if type(data[key]) == dbus.String:
                 env[key.upper()] = data[key].encode("utf-8")
+        # dirty hack to prevent unnecessary double execution
+        if str(env) == track.last: return
+        track.last = str(env)
         subprocess.Popen(command, shell=True, env=env).communicate()
 
     track.last = None
