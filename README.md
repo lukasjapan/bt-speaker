@@ -57,6 +57,10 @@ The default settings of BT-Speaker will be copied and can be overridden in `/etc
 The settings in the alsa section specify on which alsa mixer ([more info here](https://larsimmisch.github.io/pyalsaaudio/libalsaaudio.html#mixer-objects)) volume changes are applied.
 You need to adjust these settings if you are using an external sound card.
 
+## Notes on Raspberry 4
+
+The alsa mixer device representing the 3.5 mm analog audio jack on the RPi 4 is called `Headphone` and is only available while no HDMI port is in use. Additionally, the `pcm.front` stanza in `/usr/share/alsa/alsa.conf` must be changed from `pcm.front cards.pcm.front` to `pcm.front cards.pcm.default`.
+
 ## Details of Implementation
 
 The BT-Speaker daemon has been written in Python and works with Bluez5.
