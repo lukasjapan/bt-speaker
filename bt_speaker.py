@@ -44,9 +44,13 @@ class PipedSBCAudioSinkWithAlsaVolumeControl(SBCAudioSink):
         )
 
         if config.getboolean('alsa', 'enabled'):
+            # Use first available if no mixer is set
+            control = config.get('alsa', 'mixer') or alsaaudio.mixers()[0]
+            print("Using mixer %s" % control)
+
             # Hook into alsa service for volume control
             self.alsamixer = alsaaudio.Mixer(
-                control=config.get('alsa', 'mixer'),
+                control=control,
                 id=int(config.get('alsa', 'id')),
                 cardindex=int(config.get('alsa', 'cardindex'))
             )

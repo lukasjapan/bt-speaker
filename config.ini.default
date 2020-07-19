@@ -12,6 +12,6 @@ pin_code = 0000
 
 [alsa]
 enabled = yes
-mixer = PCM
+mixer = 
 id = 0
 cardindex = 0
