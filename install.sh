@@ -1,7 +1,9 @@
 #!/bin/bash +x
 set -e
 
-# This script has been tested with the "2020-02-13-raspbian-buster-lite.img" image.
+# This script has been tested on 2020/07/19
+# OS: Raspbian GNU/Linux 10 (buster)
+# Model: Raspberry Pi 3 Model B Rev 1.2
 
 echo "Installing dependencies..."
 apt-get update

@@ -2,11 +2,11 @@
 
 A simple Bluetooth Speaker Daemon designed for the Raspberry Pi 3.
 
-BT-Speaker aims to _just work_ on a vanilla raspbian installation using pure ALSA.
+BT-Speaker aims to _just work_ on a vanilla installation using pure ALSA.
 
 ## Installation
 
-Quick Installation for Raspbian:
+Quick Installation for Raspberry Pi OS:
 
 ```bash
 sudo -i
@@ -20,7 +20,7 @@ This can be done by `raspi-config`:
 
 `Advanced Options` -> `Audio` -> `Force 3.5mm ('headphone') jack`
 
-_Note_: Bt-speaker has been made with the default raspbian audio configuration in mind.
+_Note_: Bt-speaker has been made with the default Raspberry Pi OS audio configuration in mind.
 If you are using external sound cards or have installed a sound daemon (like PulseAudio or Jack) you might need to adjust the config file accordingly.
 
 Having a sound daemon installed might even break things.
@@ -41,18 +41,18 @@ You are advised to change the hostname according to your needs.
 
 The default settings of BT-Speaker will be copied and can be overridden in `/etc/bt_speaker/config.ini`.
 
-| Section    | Key                | Default Value                    | Description                                                                                 |
-| ---------- | ------------------ | -------------------------------- | ------------------------------------------------------------------------------------------- |
-| bt_speaker | play_command       | aplay -f cd -                    | The raw audio in CD Format (16bit little endian, 44100Hz, stereo) is piped to this command. |
-| bt_speaker | connect_command    | /etc/bt_speaker/hooks/connect    | Command that is called when an audio device connects to BT-Speaker                          |
-| bt_speaker | disconnect_command | /etc/bt_speaker/hooks/disconnect | Command that is called when an audio device disconnects from BT-Speaker                     |
-| bluez      | device_path        | /org/bluez/hci0                  | The DBUS path where BT-Speaker can find the bluetooth device                                |
-| bluez      | discoverable       | yes                              | Specifies if the raspberry pi should advertise itself if no client is connected.            |
-| bluez      | pin_code           | 0000                             | The pin code if `btmgmt ssp off`                                                            |
-| alsa       | enabled            | yes                              | Enables volume control via alsamixer                                                        |
-| alsa       | mixer              | PCM                              | The volume of this mixer will be set from AVRCP messages (Remote volume control)            |
-| alsa       | id                 | 0                                | The alsa id of the mixer control                                                            |
-| alsa       | cardindex          | 0                                | The alsa cardindex of the soundcard                                                         |
+| Section    | Key                | Default Value                    | Description                                                                                                                                                |
+| ---------- | ------------------ | -------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| bt_speaker | play_command       | aplay -f cd -                    | The raw audio in CD Format (16bit little endian, 44100Hz, stereo) is piped to this command.                                                                |
+| bt_speaker | connect_command    | /etc/bt_speaker/hooks/connect    | Command that is called when an audio device connects to BT-Speaker                                                                                         |
+| bt_speaker | disconnect_command | /etc/bt_speaker/hooks/disconnect | Command that is called when an audio device disconnects from BT-Speaker                                                                                    |
+| bluez      | device_path        | /org/bluez/hci0                  | The DBUS path where BT-Speaker can find the bluetooth device                                                                                               |
+| bluez      | discoverable       | yes                              | Specifies if the raspberry pi should advertise itself if no client is connected.                                                                           |
+| bluez      | pin_code           | 0000                             | The pin code if `btmgmt ssp off`                                                                                                                           |
+| alsa       | enabled            | yes                              | Enables volume control via alsamixer                                                                                                                       |
+| alsa       | mixer              |                                  | The volume of this mixer will be set from AVRCP messages (Remote volume control) Use `HDMI` or `Headphone`. If not set, the first mixer available is used. |
+| alsa       | id                 | 0                                | The alsa id of the mixer control                                                                                                                           |
+| alsa       | cardindex          | 0                                | The alsa cardindex of the soundcard                                                                                                                        |
 
 The settings in the alsa section specify on which alsa mixer ([more info here](https://larsimmisch.github.io/pyalsaaudio/libalsaaudio.html#mixer-objects)) volume changes are applied.
 You need to adjust these settings if you are using an external sound card.
