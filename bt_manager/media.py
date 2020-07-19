@@ -1,5 +1,3 @@
-from __future__ import unicode_literals
-
 from .interface import BTSimpleInterface, BTInterface
 # from manager import BTManager
 # from adapter import BTAdapter

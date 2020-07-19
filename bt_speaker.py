@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/usr/bin/python3
 
 from gi.repository import GLib
 from bt_manager.audio import SBCAudioSink
@@ -21,7 +21,7 @@ import os
 
 SCRIPT_PATH = os.path.dirname(os.path.realpath(__file__))
 
-config = configparser.SafeConfigParser()
+config = configparser.ConfigParser()
 config.read(SCRIPT_PATH + '/config.ini.default')
 config.read('/etc/bt_speaker/config.ini')
 

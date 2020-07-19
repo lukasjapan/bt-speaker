@@ -1,4 +1,3 @@
-from __future__ import unicode_literals
 from collections import namedtuple
 from bt_manager import ffi
 import os
