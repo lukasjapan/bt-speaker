@@ -1,6 +1,7 @@
 from collections import namedtuple
 from bt_manager import ffi
 import os
+import platform
 
 A2DP_CODECS = {'SBC': 0x00,
                'MPEG12': 0x01,
@@ -95,10 +96,15 @@ class SBCCodec:
 
         import sys
 
+        so_path = './librtpsbc.so'
+        if platform.machine() == 'aarch64':
+            so_path = './librtpsbc_aarch64.so'
+
         try:
-            self.codec = ffi.dlopen('./librtpsbc.so')
-        except:
+            self.codec = ffi.dlopen(so_path)
+        except Exception as e:
             print('Exception:' + str(sys.exc_info()[0]))
+            print(str(e))
 
         self.config = ffi.new('sbc_t *')
         self.ts = ffi.new('unsigned int *', 0)

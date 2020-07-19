@@ -3,11 +3,7 @@ CFLAGS =
 INSTALL_PREFIX = /usr
 HEADER = rtpsbc.h
 
-ifndef PLATFORM
-	PLATFORM = armv6
-endif
-
-OBJS = rtpsbc.o sbc.o sbc_primitives.o sbc_primitives_$(PLATFORM).o
+OBJS = rtpsbc.o sbc.o sbc_primitives.o
 
 TARGET = librtpsbc.so
 
